@@ -41,35 +41,23 @@ io.on('connection', function(socket){
   console.log('a user connected');
 });
 
-/*app.get('/searchsong',(req, res) => {
-  var param_string = querystring.parse(location.search);
-  var param_text = param_string.text;
-  var type = "track";
-  var options = { 
-                  url:'https://api.spotify.com/v1/search'+'?q='+param_text+'&type='+ type,
-                  headers : 
-                     {
-                      'Authorization': 'Bearer' + access_token_share 
-                      },
-                   json : true
-                 };
-                request.get(options, function(error, response, body) {
-                    console.log(body);
-                });
-                res.json(body);
-                  
-}); 
-*/
+ 
 
-/* Test search 1
+
+
+
+
 app.get('/playsong',(req ,res) => {
-  var param_string =  querystring.parse(location.search);
-  var param_text = param_string.text;
-  var bodystruct;
+
+  var param_string = req.query.song;
+  var token = req.query.token;
+
+  console.log(param_string); 
+  console.log(token);
   var type = "track";
   console.log(req.query);
    var options = {
-          url: 'https://api.spotify.com/v1/search'+'?q='+param_text+'&type='+ type,
+          url: 'https://api.spotify.com/v1/search'+'?q='+param_string+'&type='+ type,
           headers: { 
                      'Authorization': 'Bearer ' + access_token_share },
           json: true
@@ -83,7 +71,7 @@ app.get('/playsong',(req ,res) => {
           res.json(body);
     
 });
-*/
+
 
 /* Test search 2
 
@@ -118,12 +106,9 @@ app.get('/', (req, res) => {
  
 });
 
-// Share access token with client
 
-app.get('/getter', (req, res) => {
- console.log(req.query);
- res.json({access_token : access_token_share});
-});
+
+
 
 // Get code and state using login (Client Secret and id)
 
@@ -192,9 +177,49 @@ app.get('/refresh_token', function(req, res) {
     if (!error && response.statusCode === 200) {
       var access_token = body.access_token;
       access_token_share = access_token;
-        res.redirect('/');
+        res.redirect('/?'+querystring.stringify({'access_token':access_token_share}));
     }
   });
+});
+
+// Share access token with client
+app.get('/getter', (req, res) => {
+
+ res.json({access_token : access_token_share});
+});
+
+app.get('/searchsong',(req, res) => {
+
+  var param_string = req.query.song;
+  var token = req.query.token;
+
+  console.log(param_string); 
+  console.log(token);
+
+  var type = "track";
+  
+  var items;
+
+  var options = { 
+              url:'https://api.spotify.com/v1/search'+'?q='+param_string+'&type='+type+'&limit=2',                
+              headers : { 'Accept': 'application/json',
+                          
+                         'Content-Type': 'application/json',
+                      
+                          'Authorization': 'Bearer ' + token },
+                         
+               json: true
+             }; 
+
+    request.get(options, function(error, response, body) {
+         var json_tracks = JSON.stringify(response.body.tracks);
+         items = json_tracks;
+         console.log(items);
+         res.send(items);
+         
+    });
+   
+             
 });
 
 
